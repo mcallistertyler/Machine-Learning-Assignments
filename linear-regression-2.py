@@ -19,13 +19,15 @@ def open_csv(csv_filename, prepend_ones):
         X1list = np.column_stack((ones, X1list))
     return (X1list, ylist)            
 
+def compare_predictions(xvalues, yvalues, predictions):
+    for x in range(0, len(xvalues)):
+        print "Test x: ", xvalues[x], " Actual y: ", yvalues[x], " Predicted y", predictions[int(x)]
+
 def plot_graph(xvalues, yvalues, predictions):
-    print xvalues
-    print predictions
+    compare_predictions(xvalues, yvalues, predictions)
     fit = np.polyfit(xvalues,yvalues,1)
     fit_fn = np.poly1d(fit)
     plt.plot(xvalues,yvalues,'yo',xvalues,fit_fn(predictions),'--k')
-    #plt.scatter(xvalues, yvalues)
     plt.title('ML&CBR Assignment 1')
     plt.xlabel('test_set_x')
     plt.ylabel('test_results_y')

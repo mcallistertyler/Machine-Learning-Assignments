@@ -30,6 +30,10 @@ def open_csv(csv_filename, prepend_ones):
 #     plt.ylabel('y')
 #     plt.show()
 
+def compare_predictions(xvalues, yvalues, predictions):
+    for x in range(0, len(xvalues)):
+        print "Test x: ", xvalues[x], " Actual y: ", yvalues[x], " Predicted y", predictions[int(x)]
+
 def mean_squared_error(predictions, test_data_results, weights):
     n = len(predictions)
     total_error = 0
@@ -45,6 +49,7 @@ def linear_regression(weights, test_data, test_data_results):
         components = weights[1:] * i
         predictions.append(sum(components) + weights[0])
     mean_squared_error(predictions, test_data_results, weights)
+    compare_predictions(test_data, test_data_results, predictions)
     return predictions
 
 
