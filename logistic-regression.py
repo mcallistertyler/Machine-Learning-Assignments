@@ -21,8 +21,10 @@ def open_csv(csv_filename, prepend_ones):
         X_all = np.concatenate((ones, X_all), 1)
     return (X_all, ylist) 
 
+def logistic_regression():
+    print "Logistic regression bruh"
+
 if __name__ == "__main__":
-    print("Logistic Regression")
     (cl_train_x, cl_train_results) = open_csv('cl_train_1.csv', False)
     (cl_test_x, cl_test_results) = open_csv('cl_test_1_csv', False)
     print(cl_test_x)
