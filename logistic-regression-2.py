@@ -93,15 +93,15 @@ def plot_graph(xvalues, yvalues, predictions, weights, title):
     plt.ylabel('x2')
 
 if __name__ == "__main__":
-    (cl_train_x, cl_train_results) = open_csv('cl_train_1.csv', True)
-    (cl_test_x, cl_test_results) = open_csv('cl_test_1.csv', True)
+    (cl_train_x, cl_train_results) = open_csv('cl_train_2.csv', True)
+    (cl_test_x, cl_test_results) = open_csv('cl_test_2.csv', True)
     init_weights = np.random.uniform(-1, 1, (3,))
-    (trained_weights, cost_history) = train(cl_train_x, cl_train_results, init_weights, 0.5, 6000)
+    (trained_weights, cost_history) = train(cl_train_x, cl_train_results, init_weights, 0.05, 6000)
     print "----------Training----------"
     print "Trained predictions", predict(cl_train_x, trained_weights)
     print "Trained classifications", classify(predict(cl_test_x, trained_weights))
     print "Trained cost", cost_history[-1]
-    plot_cost(cost_history)
+    #plot_cost(cost_history)
     print "Trained weights", trained_weights
     plot_graph(cl_train_x, cl_train_results, predict(cl_train_x, trained_weights), trained_weights, "Programming Task 2 - Training Set 1")
     print "-----------------------------\n"
@@ -109,5 +109,5 @@ if __name__ == "__main__":
     print "Test predictions", predict(cl_test_x, trained_weights)
     print "Test classifications", classify(predict(cl_test_x, trained_weights))
     print "Test cost", cross_entropy(cl_test_x, cl_test_results, trained_weights)
-    plot_graph(cl_test_x, cl_test_results, predict(cl_test_x, trained_weights), trained_weights, "Programming Task 2 - Test Set 1")
+    #plot_graph(cl_test_x, cl_test_results, predict(cl_test_x, trained_weights), trained_weights, "Programming Task 2 - Test Set 1")
     plt.show()

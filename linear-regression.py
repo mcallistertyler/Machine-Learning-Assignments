@@ -23,13 +23,6 @@ def open_csv(csv_filename, prepend_ones):
         X_all = np.concatenate((ones, X_all), 1)
     return (X_all, ylist)            
 
-# def plot_graph(xvalues, yvalues, predictions):
-#     plt.scatter(xvalues, yvalues)
-#     plt.title('Graph')
-#     plt.xlabel('x')
-#     plt.ylabel('y')
-#     plt.show()
-
 def compare_predictions(xvalues, yvalues, predictions):
     for x in range(0, len(xvalues)):
         print "Test x: ", xvalues[x], " Actual y: ", yvalues[x], " Predicted y", predictions[int(x)]
@@ -43,13 +36,17 @@ def mean_squared_error(predictions, test_data_results, weights):
     print "Mean Squared Error:", mse
     return mse
 
-def linear_regression(weights, test_data, test_data_results):
+def linear_regression(weights, test_data, test_data_results, training_flag):
     predictions = []
     for i in test_data:
-        components = weights[1:] * i
-        predictions.append(sum(components) + weights[0])
+        if training_flag == True:
+            components = weights.T * i
+            predictions.append(sum(components))
+        else:
+            components = weights[1:] * i
+            predictions.append(sum(components) + weights[0])
     mean_squared_error(predictions, test_data_results, weights)
-    compare_predictions(test_data, test_data_results, predictions)
+    #compare_predictions(test_data, test_data_results, predictions)
     return predictions
 
 
@@ -61,4 +58,5 @@ def closed_form(x_data, y_data):
 if __name__ == "__main__":
     (training_set_x, training_results_y) = open_csv('train_2d_reg_data.csv', True)
     (test_set_x, test_results_y) = open_csv('test_2d_reg_data.csv', False)
-    linear_regression(closed_form(training_set_x, training_results_y),test_set_x, test_results_y)
+    linear_regression(closed_form(training_set_x, training_results_y), training_set_x, training_results_y, True)
+    linear_regression(closed_form(training_set_x, training_results_y),test_set_x, test_results_y, False)
