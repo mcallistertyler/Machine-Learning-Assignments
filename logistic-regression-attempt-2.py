@@ -16,7 +16,6 @@ def open_csv(csv_filename, prepend_ones):
     X2list = np.array(map(float,X2list))
     ylist = np.array(map(float,ylist))
     X_all = np.column_stack((X1list, X2list))
-    ## prepend ones to the data. this is the bias    
     if prepend_ones == True:
         ones = np.ones(shape=ylist.shape)[..., None]
         X_all = np.concatenate((ones, X_all), 1)
@@ -25,7 +24,6 @@ def open_csv(csv_filename, prepend_ones):
 def sigmoid(z):
     return 1/(1+np.exp(-z))
 
-## "Classifies data" by outputting a 0 or 1 depending on the calculated probability
 def classify(prediction):
     classifications = []
     for x in range(0,len(prediction)):
@@ -35,24 +33,22 @@ def classify(prediction):
             classifications.append(0)
     return classifications
 
-## Prediction using sigmoid function
-def predict(x_data, weights):
-    z = np.dot(x_data, weights)
+def predict(features, weights):
+    z = np.dot(features, weights)
     return sigmoid(z)
 
-## Gradient descent, used to train weights for the model
-def gradient_descent(x_data, targets, weights, alpha):
-    predictions = predict(x_data, weights)
-    gradient = np.dot(x_data.transpose(), (predictions - targets)) / targets.shape[0]
+def gradient_descent(features, targets, weights, alpha):
+    predictions = predict(features, weights)
+    gradient = np.dot(features.transpose(), (predictions - targets)) / targets.shape[0]
     weights -= alpha * gradient    
     return weights
 
-def cross_entropy(x_data, y_data, weights):
-    observations = len(y_data)
-    predictions = predict(x_data, weights)
+def cross_entropy(features, labels, weights):
+    observations = len(labels)
+    predictions = predict(features, weights)
 
-    class1_cost = -y_data*np.log(predictions)
-    class2_cost = (1-y_data)*np.log(1-predictions)
+    class1_cost = -labels*np.log(predictions)
+    class2_cost = (1-labels)*np.log(1-predictions)
 
     cost = class1_cost - class2_cost
 
@@ -60,34 +56,51 @@ def cross_entropy(x_data, y_data, weights):
 
     return cost
 
-def train(x_data, y_data, weights, alpha, iterations):
+def train(features, labels, weights, alpha, iterations):
     cost_history = []
     for i in range(iterations):
-        weights = gradient_descent(x_data, y_data, weights, alpha)
-        cost = cross_entropy(x_data, y_data, weights)
+        weights = gradient_descent(features, labels, weights, alpha)
+        cost = cross_entropy(features, labels, weights)
         cost_history.append(cost)
     return weights, cost_history
 
-## Plot cost/error
-def plot_cost(costs, title):
-    fig = plt.figure()
-    plt.title(title)
-    plt.plot(costs)
+def split_list(decisions):
+    positives = []
+    negatives = []
+    for x in range(0, len(decisions)):
+        if decisions[x] >= 0.5:
+            positives.append(decisions[x])
+        else:
+            negatives.append(decisions[x])
+    return (positives, negatives)        
 
-## Plot graph to show linear separability
-def plot_graph(xvalues, yvalues, predictions, weights, title):
+def plot_predictions(all_x, predictions, actual, weights):
+    x = np.linspace(0, 1, 50)
+    y = -(weights[0] + weights[1]*x)/weights[2]
+    plt.plot(all_x[:,0], "+", all_x[:,1], "x")
+    plt.show()
+
+def plot_cost(costs):
+    fig = plt.figure()
+    plt.plot(costs)
+    
+
+def plot_graph(xvalues, yvalues, predictions, weights):
     fig = plt.figure()
     ax = fig.add_subplot(111)
     fit_fn = -(weights[1] * xvalues[:,1])/weights[2]-weights[0]/weights[2]
     plt.plot(xvalues[:,1],fit_fn, 'k-')
+    print "Xvals", xvalues[:,1]
+    print "Predics", predictions
     for x in range(0, xvalues.shape[0]):
         if(predictions[x] < 0.5):
             ax.scatter(xvalues[:,1][x], predictions[x], c='b', marker="o")
         else:
             ax.scatter(xvalues[:,1][x], predictions[x], c='r', marker="x")
-    plt.title(title)
+    plt.title('ML&CBR Assignment 1')
     plt.xlabel('x1')
     plt.ylabel('x2')
+    plt.show()
 
 if __name__ == "__main__":
     (cl_train_x, cl_train_results) = open_csv('cl_train_1.csv', True)
@@ -98,13 +111,12 @@ if __name__ == "__main__":
     print "Trained predictions", predict(cl_train_x, trained_weights)
     print "Trained classifications", classify(predict(cl_test_x, trained_weights))
     print "Trained cost", cost_history[-1]
-    plot_cost(cost_history, "Training Data")
+    plot_cost(cost_history)
     print "Trained weights", trained_weights
-    plot_graph(cl_train_x, cl_train_results, predict(cl_train_x, trained_weights), trained_weights, "Programming Task 2 - Training Set 1")
+    plot_graph(cl_train_x, cl_train_results, predict(cl_train_x, trained_weights), trained_weights)
     print "-----------------------------\n"
-    print "----------Testing------------"
+    print "----------Testing-----------"
     print "Test predictions", predict(cl_test_x, trained_weights)
     print "Test classifications", classify(predict(cl_test_x, trained_weights))
     print "Test cost", cross_entropy(cl_test_x, cl_test_results, trained_weights)
-    plot_graph(cl_test_x, cl_test_results, predict(cl_test_x, trained_weights), trained_weights, "Programming Task 2 - Test Set 1")
-    plt.show()
+    plot_graph(cl_test_x, cl_test_results, predict(cl_test_x, trained_weights), trained_weights)
