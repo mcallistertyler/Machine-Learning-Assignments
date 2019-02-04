@@ -1,3 +1,5 @@
+#Tyler McAllister
+#TDT4173
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,23 +20,18 @@ def open_csv(csv_filename, prepend_ones):
     X2list = np.array(map(float,X2list))
     ylist = np.array(map(float,ylist))
     X_all = np.column_stack((X1list, X2list))
+    ## prepend ones to the data. this is the bias
     if prepend_ones == True:
         ones = np.ones(shape=ylist.shape)[..., None]
         X_all = np.concatenate((ones, X_all), 1)
     return (X_all, ylist)            
 
-# def plot_graph(xvalues, yvalues, predictions):
-#     plt.scatter(xvalues, yvalues)
-#     plt.title('Graph')
-#     plt.xlabel('x')
-#     plt.ylabel('y')
-#     plt.show()
-
 def compare_predictions(xvalues, yvalues, predictions):
     for x in range(0, len(xvalues)):
         print "Test x: ", xvalues[x], " Actual y: ", yvalues[x], " Predicted y", predictions[int(x)]
 
-def mean_squared_error(predictions, test_data_results, weights):
+##Returns the mean squared error of a prediction compared with
+def mean_squared_error(predictions, test_data_results):
     n = len(predictions)
     total_error = 0
     for x in range(0,n):
@@ -43,16 +40,21 @@ def mean_squared_error(predictions, test_data_results, weights):
     print "Mean Squared Error:", mse
     return mse
 
-def linear_regression(weights, test_data, test_data_results):
+def linear_regression(weights, test_data, test_data_results, training_flag):
     predictions = []
     for i in test_data:
-        components = weights[1:] * i
-        predictions.append(sum(components) + weights[0])
-    mean_squared_error(predictions, test_data_results, weights)
+        if training_flag == True:
+            components = weights.T * i
+            predictions.append(sum(components))
+        else:
+            components = weights[1:] * i
+            predictions.append(sum(components) + weights[0])
+    mean_squared_error(predictions, test_data_results)
     compare_predictions(test_data, test_data_results, predictions)
     return predictions
 
-
+## Ordinary least squares, takes x_data - the training set inputs as a numpy ndarray and the training results
+## as a numpy ndarray
 def closed_form(x_data, y_data):
     w = np.linalg.pinv(x_data.transpose().dot(x_data)).dot(x_data.transpose()).dot(y_data)
     print "Weights:", w
@@ -60,5 +62,11 @@ def closed_form(x_data, y_data):
 
 if __name__ == "__main__":
     (training_set_x, training_results_y) = open_csv('train_2d_reg_data.csv', True)
-    (test_set_x, test_results_y) = open_csv('test_2d_reg_data.csv', False)
-    linear_regression(closed_form(training_set_x, training_results_y),test_set_x, test_results_y)
+    (test_set_x, test_results_y) = open_csv('test_2d_reg_data.csv', True)
+    print "----------Training----------"
+    #linear regression creates weights using closed form and makes predictions on the training data to show the MSE
+    linear_regression(closed_form(training_set_x, training_results_y), training_set_x, training_results_y, True)
+    print "----------------------------\n"
+    print "----------Testing-----------"
+    linear_regression(closed_form(training_set_x, training_results_y),test_set_x, test_results_y, True)
+    print "----------------------------\n"

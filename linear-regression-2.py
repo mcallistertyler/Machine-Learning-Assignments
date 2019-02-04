@@ -14,6 +14,7 @@ def open_csv(csv_filename, prepend_ones):
             ylist.append(row[1])
     X1list = np.array(map(float,X1list))
     ylist = np.array(map(float,ylist))
+    ## prepend ones to the data. this is the bias
     if prepend_ones == True:
         ones = np.ones(shape=ylist.shape)[..., None]
         X1list = np.column_stack((ones, X1list))
@@ -23,11 +24,14 @@ def compare_predictions(xvalues, yvalues, predictions):
     for x in range(0, len(xvalues)):
         print "Test x: ", xvalues[x], " Actual y: ", yvalues[x], " Predicted y", predictions[int(x)]
 
-def plot_graph(xvalues, yvalues, predictions):
+def plot_graph(xvalues, yvalues, predictions, weights):
     compare_predictions(xvalues, yvalues, predictions)
-    fit = np.polyfit(xvalues,yvalues,1)
+    fit = np.polyfit(xvalues,yvalues,deg=1)
+    y = weights[0] + weights[1] * xvalues
     fit_fn = np.poly1d(fit)
-    plt.plot(xvalues,yvalues,'yo',xvalues,fit_fn(predictions),'--k')
+    #plt.plot(xvalues,yvalues,'yo',xvalues,fit_fn(predictions),'--k')
+    plt.plot(xvalues,yvalues,'yo')
+    plt.plot(xvalues,y, '-')
     plt.title('ML&CBR Assignment 1')
     plt.xlabel('test_set_x')
     plt.ylabel('test_results_y')
@@ -48,7 +52,7 @@ def linear_regression(weights, test_data, test_data_results):
         components = weights[1:] * i
         predictions.append(sum(components) + weights[0])
     mean_squared_error(predictions, test_data_results, weights)
-    plot_graph(test_data, test_data_results, predictions)
+    plot_graph(test_data, test_data_results, predictions, weights)
     return predictions
 
 

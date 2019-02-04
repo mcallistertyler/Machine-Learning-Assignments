@@ -1,10 +1,11 @@
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
-
 def open_csv(csv_filename, prepend_ones):
     X1list = []
     X2list = []
+    X3list = []
+    X4list = []
     ylist = []
     with open(csv_filename, 'rt') as csvfile:
         readfile = csv.reader(csvfile, delimiter=',')
@@ -14,9 +15,11 @@ def open_csv(csv_filename, prepend_ones):
             ylist.append(row[2])
     X1list = np.array(map(float,X1list))
     X2list = np.array(map(float,X2list))
+    X3list = np.square(X1list)
+    X4list = np.square(X2list)
     ylist = np.array(map(float,ylist))
-    X_all = np.column_stack((X1list, X2list))
-    ## prepend ones to the data. this is the bias    
+    X_all = np.column_stack((X1list, X2list, X3list, X4list))
+    ## prepend ones to the data. this is the bias
     if prepend_ones == True:
         ones = np.ones(shape=ylist.shape)[..., None]
         X_all = np.concatenate((ones, X_all), 1)
@@ -25,7 +28,6 @@ def open_csv(csv_filename, prepend_ones):
 def sigmoid(z):
     return 1/(1+np.exp(-z))
 
-## "Classifies data" by outputting a 0 or 1 depending on the calculated probability
 def classify(prediction):
     classifications = []
     for x in range(0,len(prediction)):
@@ -35,12 +37,10 @@ def classify(prediction):
             classifications.append(0)
     return classifications
 
-## Prediction using sigmoid function
 def predict(x_data, weights):
     z = np.dot(x_data, weights)
     return sigmoid(z)
 
-## Gradient descent, used to train weights for the model
 def gradient_descent(x_data, targets, weights, alpha):
     predictions = predict(x_data, weights)
     gradient = np.dot(x_data.transpose(), (predictions - targets)) / targets.shape[0]
@@ -68,13 +68,10 @@ def train(x_data, y_data, weights, alpha, iterations):
         cost_history.append(cost)
     return weights, cost_history
 
-## Plot cost/error
-def plot_cost(costs, title):
+def plot_cost(costs):
     fig = plt.figure()
-    plt.title(title)
     plt.plot(costs)
 
-## Plot graph to show linear separability
 def plot_graph(xvalues, yvalues, predictions, weights, title):
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -90,21 +87,22 @@ def plot_graph(xvalues, yvalues, predictions, weights, title):
     plt.ylabel('x2')
 
 if __name__ == "__main__":
-    (cl_train_x, cl_train_results) = open_csv('cl_train_1.csv', True)
-    (cl_test_x, cl_test_results) = open_csv('cl_test_1.csv', True)
-    init_weights = np.random.uniform(-1, 1, (3,))
-    (trained_weights, cost_history) = train(cl_train_x, cl_train_results, init_weights, 0.5, 6000)
+    (cl_train_x, cl_train_results) = open_csv('cl_train_2.csv', True)
+    (cl_test_x, cl_test_results) = open_csv('cl_test_2.csv', True)
+    init_weights = np.random.uniform(-1, 1, (5,))
+    (trained_weights, cost_history) = train(cl_train_x, cl_train_results, init_weights, 0.6, 6000)
     print "----------Training----------"
     print "Trained predictions", predict(cl_train_x, trained_weights)
     print "Trained classifications", classify(predict(cl_test_x, trained_weights))
     print "Trained cost", cost_history[-1]
-    plot_cost(cost_history, "Training Data")
+    plot_cost(cost_history)
     print "Trained weights", trained_weights
-    plot_graph(cl_train_x, cl_train_results, predict(cl_train_x, trained_weights), trained_weights, "Programming Task 2 - Training Set 1")
+    #plot_graph(cl_train_x, cl_train_results, predict(cl_train_x, trained_weights), trained_weights, "Programming Task 2 - Training Set 2")
     print "-----------------------------\n"
     print "----------Testing------------"
     print "Test predictions", predict(cl_test_x, trained_weights)
     print "Test classifications", classify(predict(cl_test_x, trained_weights))
     print "Test cost", cross_entropy(cl_test_x, cl_test_results, trained_weights)
-    plot_graph(cl_test_x, cl_test_results, predict(cl_test_x, trained_weights), trained_weights, "Programming Task 2 - Test Set 1")
+    print "-----------------------------\n"
+    #plot_graph(cl_test_x, cl_test_results, predict(cl_test_x, trained_weights), trained_weights, "Programming Task 2 - Test Set 1")
     plt.show()
